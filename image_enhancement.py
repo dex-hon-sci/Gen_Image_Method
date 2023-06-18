@@ -4,6 +4,8 @@
 Created on Thu Jun 15 17:17:56 2023
 
 @author: dexter
+
+This is an experimental script to implement SR3 image enhancement.
 """
 
 #Train RS3 image enhancement

@@ -16,13 +16,28 @@ Created on Thu Jun 15 21:59:22 2023
 #resize image to resolve edge pprobken
 
 
+from numpy.fft import fftn, ifftn, fftshift 
 
 def deconvolve(img, psf, num_iter = 200):
-    deconv_img = restoration.richardson_lucy(img, psf, num_iter=num_iter)
+    #deconv_img = restoration.richardson_lucy(img, psf, num_iter=num_iter)
+    otf = fftn(fftshift(psf))
+    otf_ = np.conjugate(otf)    
+    estimate = img#np.ones(image.shape)/image.sum()
 
-    return deconv_img
+    for i in range(num_iter):
+        #print(i)
+    
+        reblurred = ifftn(conv2(fftn(estimate),otf))
+        ratio = img / (reblurred + 1e-30)
+        estimate = estimate * (ifftn(fftn(ratio) * otf_)).astype(float)
 
-# input image
+    return estimate
+
+
+
+   # deconv_img = None
+    #return deconv_img
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import convolve2d as conv2
@@ -31,7 +46,24 @@ from skimage import color, data, restoration
 
  
 def gaussian_filter(kernel_size, sigma=1, muu=0):
- 
+    """
+    Construction of a 2D gaussian squared grid.
+
+    Parameters
+    ----------
+    kernel_size : float
+        The length of the grid.
+    sigma : float, optional
+        The standard deviation of the Gaussian distribution. The default is 1.
+    muu : float, optional
+        The mean of the Gaussian. The default is 0.
+
+    Returns
+    -------
+    gauss : 2D ndarray
+        The frame with the Gaussian distribution (centred at zero).
+
+    """
     # Initializing value of x,y as grid of kernel size
     # in the range of kernel size
  
@@ -40,7 +72,7 @@ def gaussian_filter(kernel_size, sigma=1, muu=0):
     dst = np.sqrt(x**2+y**2)
  
     # lower normal part of gaussian
-    normal = 1/(2.0 * np.pi * sigma**2)
+    normal = 1.0 /(2.0 * np.pi * sigma**2)
 
     # Calculating Gaussian filter
     gauss = np.exp(-((dst-muu)**2 / (2.0 * sigma**2))) * normal
@@ -48,14 +80,49 @@ def gaussian_filter(kernel_size, sigma=1, muu=0):
     return gauss
 
 def sharpen_filter(centre,surround = -1):
-    
+    """
+    Construct a 3x3 sharpening kernel 
+
+    Parameters
+    ----------
+    centre : float
+        The centre value of the kernel (The degree of enhancement).
+    surround : float, optional
+        The centre value of the kernel (The degree of devaluation).
+        The default is -1.
+
+    Returns
+    -------
+    sharpen_filter : 2D ndarray
+        The sharpening kernel.
+
+    """
     sharpen_filter=np.array([[surround,surround,surround],
                              [surround,centre,surround],
                              [surround,surround,surround]])
     
     return sharpen_filter
 
-def gen_noise_poisson(lam, dim):
+def gen_noise_poisson(lam, dim, norm = 255):
+    """
+    Generate a 2D frame of poisson noise.
+
+    Parameters
+    ----------
+    lam : float
+        Lambda in the Poisson distribution, the expected value.
+    dim : tuple
+        The dimension of the frame.
+        e.g. (5,5): 5x5 grid.
+    norm : float
+        Normalisation value. Default is 255.
+
+    Returns
+    -------
+    noise_frame : 2D ndarray
+        The noise frame.
+
+    """
     
     rng = np.random.default_rng()
 
@@ -87,6 +154,7 @@ astro_noisy4 =  astro.copy() + (rng.poisson(lam=25, size=astro.shape) - 10) / 25
 
 # Restore Image using Richardson-Lucy algorithm
 deconvolved_RL = restoration.richardson_lucy(astro, psf, num_iter=500)
+deconvolved_RL2 = deconvolve(astro, psf, num_iter=500)
 
 #deconvolved_RL_denoise = deconvolved_RL - noise_frame
 
@@ -102,7 +170,37 @@ deconvolved_RL = restoration.richardson_lucy(astro, psf, num_iter=500)
 #plt.show()
 
 
+def gen_over_exposure():
+    return None
+
+def source_detect(img):
+    # source detection and segmentation
+
+    return None
+
+def fill_gap():
+    #fill noise with noise of cubic interpolation
+    return None
+
 def plot_three_frame(original, noisy, restore):
+    """
+    Plot three frame
+
+    Parameters
+    ----------
+    original : TYPE
+        DESCRIPTION.
+    noisy : TYPE
+        DESCRIPTION.
+    restore : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    fig : TYPE
+        DESCRIPTION.
+
+    """
     
     fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 5))
     plt.gray()
@@ -132,7 +230,6 @@ def plot_three_frame(original, noisy, restore):
 #plot_three_frame(astro_og, deconvolved_RL, astro_og-deconvolved_RL)
 
 
-from scipy.fft import ifftn
 import matplotlib.cm as cm
 
 lily = color.rgb2gray(data.hubble_deep_field())
@@ -162,5 +259,6 @@ lily_deconv = deconvolve(lily, psf)
 
 
 plot_three_frame(astro,astro_noisy, deconvolved_RL)
+plot_three_frame(astro,astro_noisy, deconvolved_RL2)
 
 plot_three_frame(lily, psf, lily_deconv)
