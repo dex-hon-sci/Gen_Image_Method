@@ -11,11 +11,6 @@ The aim of this project is to create a set of useful functions and network for m
 Setup
 =====
 
-Instruction
-
-Installation
-============
-
 Quick Examples
 ==============
 
