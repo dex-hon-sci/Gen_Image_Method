@@ -15,7 +15,6 @@ This script contains useful functions for noise handling.
 
 #resize image to resolve edge pprobken
 from matplotlib.patches import Ellipse
-
 import cv2 
 import matplotlib.cm as cm
 from numpy.fft import fftn, ifftn, fftshift 
@@ -332,76 +331,3 @@ def draw_ellipses(img, objects,ref):
         ax.add_artist(e)
     return fig
 
-#%%
-rng = np.random.default_rng()
-astro_og = color.rgb2gray(data.immunohistochemistry())
-
-#psf = np.random.multivariate_normal(mean, cov, (3,3))
-psf = gaussian_filter(10,sigma=5,muu=0)
-
-astro = conv2(astro_og, psf, 'same')
-# Add Noise to Image
-
-astro_noisy = astro.copy()
-astro_noisy += gen_noise_poisson(255, astro.shape, norm = 255) #(rng.poisson(lam=25, size=astro.shape) - 10) / 255.
-
-
-# Restore Image using Richardson-Lucy algorithm
-deconvolved_RL = restoration.richardson_lucy(astro, psf, num_iter=500)
-deconvolved_RL2 = deconvolve(astro, psf, num_iter=500)
-
-#deconvolved_RL_denoise = deconvolved_RL - noise_frame
-
-
-
-#plot_three_frame(astro,astro_noisy, deconvolved_RL_denoise)
-
-
-#fig = plt.subplot()
-#plt.imshow(astro_og-deconvolved_RL)
-#plt.show()
-
-#plot_three_frame(astro_og, deconvolved_RL, astro_og-deconvolved_RL)
-
-
-lily = color.rgb2gray(data.hubble_deep_field())
-#lily = data.hubble_deep_field()
-
-#noise_frequency = ifftn(lily)
-
-#fig = plt.subplot()
-#plt.imshow(np.real(noise_frequency), norm='linear', #cmap=cm.Reds,
-#           vmin=np.real(noise_frequency).min(), 
-#           vmax=np.real(noise_frequency).max())
-#plt.show()
-
-
-# create a sharpening kernel
-sharpen_filter = sharpen_filter(9,surround = -1)
-# applying kernels to the input image to get the sharpened image
-sharp_image=cv2.filter2D(lily,-1,sharpen_filter)
-
-#fig = plt.subplot()
-#plt.imshow(lily, vmin=astro_og.min(), vmax=astro_og.max())
-#plt.show()
-
-#lily = conv2(lily, psf, 'same')
-#lily_deconv = deconvolve(lily, psf)
-
-
-#plot_three_frame(astro,astro_noisy, deconvolved_RL)
-plot_three_frame(astro,astro_noisy, deconvolved_RL2)
-
-#plot_three_frame(lily, psf, lily_deconv)
-
-
-bkg = bg_estimate(astro)
-
-
-# spark detection
-#sparky = add_spark(astro, spark_num =20, connect_pix= 400)
-#plot_three_frame(astro,sparky, astro+sparky,
-#                 'Original Data', 'Sparks', "Composed Image")
-
-#bright_spot = source_detect(astro+sparky)
-#draw_ellipses(astro+sparky, bright_spot,astro)

@@ -3,8 +3,8 @@
 A toy project to create a generic image processing package.
 
 The project consist of two main parts:
-1) Image enhancement via Machine learning, and
-2) Error detection and correction methods in image processing.
+	1) Image enhancement via Machine learning, and
+	2) Error detection and correction methods in image processing.
 
 The aim of this project is to create a set of useful functions and network for more in-depth project related to Astronomical image processing or Atomic force microscpy in the future.
 
@@ -18,7 +18,8 @@ Adding bright sparks
 
 	import noise_handling as N
 	from skimage import color, data, restoration
-	
+	from scipy.signal import convolve2d as conv2
+
 	# Load image
 	Image = color.rgb2gray(data.immunohistochemistry())
 	
@@ -44,5 +45,24 @@ Source detection
 
 Creating a noisy convolved image and Deconvolve it
 --------------------------------------------------
+.. code:: python
+
+	# Generate a Gaussian point-spread-function
+	psf = N.gaussian_filter(10,sigma=5,muu=0)
+
+	# 2D convolution
+	Image = conv2(Image, psf, 'same')
+	
+	# Add Noise to Image
+	Image_noisy = Image.copy()
+	Image_noisy += N.gen_noise_poisson(255, Image.shape, norm = 255) 
+	
+	# Deconvolution
+	deconvolved_Image = N.deconvolve(Image_noisy, psf, num_iter=500)
+	
+	# Plot 
+	N.plot_three_frame(Image,Image_noisy, deconvolved_Image)
+	
+	# There are much room to be improved on the deconvolution method
 
 .. image:: https://github.com/dex-hon-sci/Gen_Image_Method/blob/master/images/convolve_experiment.png
