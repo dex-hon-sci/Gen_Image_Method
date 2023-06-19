@@ -15,27 +15,26 @@ Quick Examples
 Adding bright sparks
 
 .. code:: python
-	import noise_handling as N
-	from skimage import color, data, restoration
+import noise_handling as N
+from skimage import color, data, restoration
 	
-	# Load image
-	Image = color.rgb2gray(data.immunohistochemistry())
+# Load image
+Image = color.rgb2gray(data.immunohistochemistry())
 	
-	# Add sparks to the frame
-	sparky = N.add_spark(Image, spark_num =20, connect_pix= 400)
+# Add sparks to the frame
+sparky = N.add_spark(Image, spark_num =20, connect_pix= 400)
 	
-	# Plot the image+ sparks
-	N.plot_three_frame(Image,sparky, astro+sparky,
-                'Original Data', 'Sparks', "Composed Image")
+# Plot the image+ sparks
+N.plot_three_frame(Image,sparky, astro+sparky,'Original Data', 'Sparks', "Composed Image")
 .. image:: https://github.com/dex-hon-sci/Gen_Image_Method/blob/master/images/spark_experiment.png
 
 Source detection
 .. code:: python
-	# Detecting bright sources
-	bright_spot = source_detect(astro+sparky)
+# Detecting bright sources
+bright_spot = source_detect(astro+sparky)
 	
-	# Plot the detection
-	draw_ellipses(astro+sparky, bright_spot,astro)
+# Plot the detection
+draw_ellipses(astro+sparky, bright_spot,astro)
 
 .. image:: https://github.com/dex-hon-sci/Gen_Image_Method/blob/master/images/spark_detection.png
 
