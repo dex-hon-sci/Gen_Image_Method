@@ -1,5 +1,3 @@
-
-
 *Gen_Image_method*
 ================
 A toy project to create a generic image processing package.
