@@ -1,5 +1,7 @@
-# Gen_Image_method
 
+
+*Gen_Image_method*
+================
 A toy project to create a generic image processing package.
 
 The project consist of two main parts:
@@ -27,7 +29,7 @@ Adding bright sparks
 	# Plot the image+ sparks
 	N.plot_three_frame(Image,sparky, astro+sparky,
                 'Original Data', 'Sparks', "Composed Image")
-.. image::
+.. image:: https://github.com/dex-hon-sci/Gen_Image_Method/blob/master/images/spark_experiment.png
 
 Source detection
 .. code:: python
@@ -37,10 +39,12 @@ Source detection
 	# Plot the detection
 	draw_ellipses(astro+sparky, bright_spot,astro)
 
-.. image::
+.. image:: https://github.com/dex-hon-sci/Gen_Image_Method/blob/master/images/spark_detection.png
 
 Creating a noisy convolved image
 
 
 
 Deconvolve
+
+.. image:: https://github.com/dex-hon-sci/Gen_Image_Method/blob/master/images/convolve_experiment.png
