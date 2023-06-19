@@ -180,7 +180,7 @@ def source_detect(img):
 
     """
     # source detection and segmentation
-    bright_obj = sep.extract(img, 1.5, err=bkg.globalrms)
+    bright_obj = sep.extract(img, 1.5) #, err=bkg.globalrms)
 
     return bright_obj
 
@@ -204,8 +204,35 @@ def bg_estimate(img):
     return bkg
 
 def deconvolve(img, psf, num_iter = 200):
+    """
+    A function to deconvolve a @D image based on a given psf.
+    At the moment, this function rely on the imperfect richardson-Lucy method.
+    Parameters
+    ----------
+    img : 2D ndarray
+        Original image.
+    psf : 2D ndarray
+        PSF image.
+    num_iter : int, optional
+        Number of iteration. The default is 200.
+
+    Returns
+    -------
+    deconv_img : 2D ndarray
+        Deconvolved image.
+
+    """
     # under construction
-    deconv_img = restoration.richardson_lucy(img, psf, num_iter=num_iter)
+    
+    # frame expansion
+    #blank = np.zeros((800,800))
+    #blank[200:img.shape[0]+200,200:img.shape[0]+200] = img
+    
+    deconv_img0 = restoration.richardson_lucy(img, psf, num_iter=num_iter)
+    
+    #resize again
+   # deconv_img = deconv_img0[200:img.shape[0],200:img.shape[0]]
+    
     #otf = fftn(fftshift(psf))
     #otf_ = np.conjugate(otf)    
     #estimate = img#np.ones(image.shape)/image.sum()
@@ -219,13 +246,19 @@ def deconvolve(img, psf, num_iter = 200):
 
     #return estimate
    # deconv_img = None
-    return deconv_img
+    #print("deconv_img", deconv_img.shape)
+   
+    return deconv_img0
 
 def denoise():
+    #under construction
     return None
 
 #%% Plotting
-def plot_three_frame(original, noisy, restore):
+def plot_three_frame(original, noisy, restore,
+                     frame1_tit="Original Data (RAW+PSF)",
+                     frame2_tit='Noisy data\n(RAW+PSF+Noise)',
+                     frame3_tit='Restoration using\nRichardson-Lucy'):
     """
     Plot three frame
 
@@ -252,29 +285,31 @@ def plot_three_frame(original, noisy, restore):
            a.axis('off')
            
     ax[0].imshow(original, vmin=original.min(), vmax=original.max())
-    ax[0].set_title('Original Data (RAW+PSF)')
+    ax[0].set_title(frame1_tit)
 
     ax[1].imshow(noisy, vmin=noisy.min(), vmax=noisy.max())
-    ax[1].set_title('Noisy data\n(RAW+PSF+Noise)')
+    ax[1].set_title(frame2_tit)
 
     ax[2].imshow(restore, vmin=original.min(), vmax=original.max())# vmin=astro_noisy.min(), vmax=astro_noisy.max())
-    ax[2].set_title('Restoration using\nRichardson-Lucy')
+    ax[2].set_title(frame3_tit)
     plt.show()
 
     return fig 
 
 
-def draw_ellipses(img, objects):
+def draw_ellipses(img, objects,ref):
     """
     To plot ellipses around bright objects
 
     Parameters
     ----------
-    img : TYPE
-        DESCRIPTION.
-    objects : TYPE
-        DESCRIPTION.
-
+    img : 2D ndarray
+        Original image.
+    objects : 2D ndarray
+        Bright object list produced by source_detect.
+    ref : 2D ndarray
+        Reference image for adjusting contrast level.
+    
     Returns
     -------
     None.
@@ -284,7 +319,7 @@ def draw_ellipses(img, objects):
     fig, ax = plt.subplots()
     mean, std = np.mean(img), np.std(img)
     im = ax.imshow(img, interpolation='nearest', cmap='gray',
-               vmin=mean-std, vmax=mean+std, origin='lower')
+               vmin=ref.min(), vmax=ref.max())
 
     # plot an ellipse for each object
     for i in range(len(objects)):
@@ -350,21 +385,23 @@ sharp_image=cv2.filter2D(lily,-1,sharpen_filter)
 #plt.imshow(lily, vmin=astro_og.min(), vmax=astro_og.max())
 #plt.show()
 
-lily = conv2(lily, psf, 'same')
-lily_deconv = deconvolve(lily, psf)
+#lily = conv2(lily, psf, 'same')
+#lily_deconv = deconvolve(lily, psf)
 
 
-plot_three_frame(astro,astro_noisy, deconvolved_RL)
-#plot_three_frame(astro,astro_noisy, deconvolved_RL2)
+#plot_three_frame(astro,astro_noisy, deconvolved_RL)
+plot_three_frame(astro,astro_noisy, deconvolved_RL2)
 
-plot_three_frame(lily, psf, lily_deconv)
+#plot_three_frame(lily, psf, lily_deconv)
 
 
 bkg = bg_estimate(astro)
 
 
+# spark detection
+#sparky = add_spark(astro, spark_num =20, connect_pix= 400)
+#plot_three_frame(astro,sparky, astro+sparky,
+#                 'Original Data', 'Sparks', "Composed Image")
 
-sparky = add_spark(astro, spark_num =20, connect_pix= 400)
-plot_three_frame(astro,bkg, astro+sparky)
-
-
+#bright_spot = source_detect(astro+sparky)
+#draw_ellipses(astro+sparky, bright_spot,astro)

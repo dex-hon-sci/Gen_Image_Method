@@ -8,9 +8,25 @@ The project consist of two main parts:
 
 The aim of this project is to create a set of useful functions and network for more in-depth project related to Astronomical image processing or Atomic force microscpy in the future.
 
-Setup
-=====
+At the moment, few functions on source detection and deconvolution are built.
 
 Quick Examples
 ==============
+Adding bright sparks
 
+.. code:: python
+	import noise_handling as N
+	from skimage import color, data, restoration
+
+
+  
+
+
+Source detection
+
+
+Creating a noisy convolved image
+
+
+
+Deconvolve
